@@ -2,43 +2,6 @@
 
 class Kohana_Ulogin {
 	
-	protected $config = array(
-		// Возможные значения: small, panel, window
-		'type' 			=> 'panel',
-		
-		// на какой адрес придёт POST-запрос от uLogin
-		'redirect_uri' 	=> NULL,
-		
-		// Сервисы, выводимые сразу
-		'providers'		=> array(
-			'vkontakte',
-			'facebook',
-			'twitter',
-			'google',
-		),
-		
-		// Выводимые при наведении
-		'hidden' 		=> array(
-			'odnoklassniki',
-			'mailru',
-			'livejournal',
-			'openid'
-		),
-		
-		// Эти поля используются для значения поля username в таблице users
-		'username' 		=> array (
-			'first_name',
-		),
-		
-		// Обязательные поля
-		'fields' 		=> array(
-			'email',
-		),
-		
-		// Необязательные поля
-		'optional'		=> array(),
-	);
-	
 	protected static $_used_id = array();
 	
 	public static function factory(array $config = array())
@@ -48,7 +11,7 @@ class Kohana_Ulogin {
 	
 	public function __construct(array $config = array())
 	{
-		$this->config = array_merge($this->config, Kohana::$config->load('ulogin')->as_array(), $config);
+		$this->config = Kohana::$config->load('ulogin')->as_array();
 		
 		if ($this->config['redirect_uri'] === NULL)
 			$this->config['redirect_uri'] = Request::initial()->url(true);
@@ -105,14 +68,17 @@ class Kohana_Ulogin {
 		
 		$s = Request::factory('http://ulogin.ru/token.php?token=' . $_POST['token'] . '&host=' . $domain)->execute()->body();
 		$user = json_decode($s, true);
-				
-		$ulogin = ORM::factory('ulogin', array('identity' => $user['identity']));
+		
+		print_r($user);
+		
+		$ulogin = ORM::factory('Ulogin', array('identity' => $user['identity']));
+		
 		
 		if (!$ulogin->loaded())
 		{
-			if (($orm_user = Auth::instance()->get_user()))
+			if ($orm_user = Auth::instance()->get_user() !== NULL )
 			{
-				$user['user_id'] = $orm_user->id;
+				$user['user_id'] = Auth::instance()->get_user()->id;
 				$ulogin->values($user, array(
 					'user_id',
 					'identity',
@@ -139,10 +105,10 @@ class Kohana_Ulogin {
 						$data[$field] = $user[$field];
 				}
 							
-				$orm_user = ORM::factory('user')->values($data);
+				$orm_user = ORM::factory('User')->values($data);
 				$orm_user->create();
-				$orm_user->add('roles', ORM::factory('role', array('name' => 'login')));
-				
+				$orm_user->add('roles', ORM::factory('Role', array('name' => 'login')));
+
 				$user['user_id'] = $orm_user->id;
 				
 				$ulogin->values($user, array(
@@ -152,11 +118,13 @@ class Kohana_Ulogin {
 				))->create();
 				
 				Auth::instance()->force_login($orm_user);
+				
 			}
 		}
 		else
 		{
-			Auth::instance()->force_login($ulogin->user);
+			$getUser = ORM::factory('User',$ulogin->user_id);
+			Auth::instance()->force_login($getUser);
 		}
 	}
 	

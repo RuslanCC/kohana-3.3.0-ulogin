@@ -3,7 +3,7 @@
 <?php if ($cfg['type'] == 'window') :?>
 
 	<a id="<?php echo $uniq_id; ?>" href="#" x-ulogin-params="<?php echo $params; ?>">
-		<img src="http://ulogin.ru/img/button.png" width=187 height=30 alt="ÌóëüòèÂõîä"/>
+		<img src="http://ulogin.ru/img/button.png" width=187 height=30 alt="ÐœÑƒÐ»ÑŒÑ‚Ð¸Ð’Ñ…Ð¾Ð´"/>
 	</a>
 
 <?php else: ?>
