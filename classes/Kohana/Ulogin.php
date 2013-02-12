@@ -82,6 +82,7 @@ class Kohana_Ulogin {
 					'identity',
 					'network',
 				))->create();
+				return $user;
 			}
 			else
 			{
@@ -117,12 +118,14 @@ class Kohana_Ulogin {
 				
 				Auth::instance()->force_login($orm_user);
 				
+				return $user;
 			}
 		}
 		else
 		{
 			$getUser = ORM::factory('User',$ulogin->user_id);
 			Auth::instance()->force_login($getUser);
+			return $user;
 		}
 	}
 	
