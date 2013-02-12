@@ -68,9 +68,7 @@ class Kohana_Ulogin {
 		
 		$s = Request::factory('http://ulogin.ru/token.php?token=' . $_POST['token'] . '&host=' . $domain)->execute()->body();
 		$user = json_decode($s, true);
-		
-		print_r($user);
-		
+				
 		$ulogin = ORM::factory('Ulogin', array('identity' => $user['identity']));
 		
 		
